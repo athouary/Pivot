@@ -26,7 +26,7 @@ public class Pivot {
     private Text line = new Text();
     private IntWritable keyOut = new IntWritable();
     private Text valueOut = new Text();
-    
+
     /**
      * Maps the future line number as key and the cell content + the future column number as value.
 	 * @param key
@@ -37,15 +37,17 @@ public class Pivot {
      */
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       StringTokenizer itr = new StringTokenizer(value.toString());
-      long column = key.get(); 
+      long column = key.get();
       while (itr.hasMoreTokens()) {
         line.set(itr.nextToken());
-        String[] splitLine = line.toString().split(",");
-        for (int i=0;  i < splitLine.length; i++) {
-        		keyOut.set(i);
-        		valueOut.set((splitLine[i] + "," + Long.toString(column)));
-        		context.write(keyOut, valueOut);
-         }
+        if(line.toString() != null) {
+          String[] splitLine = line.toString().split(",");
+          for (int i=0;  i < splitLine.length; i++) {
+          		keyOut.set(i);
+          		valueOut.set((splitLine[i] + "," + Long.toString(column)));
+          		context.write(keyOut, valueOut);
+          }
+        }
       }
     }
   }
@@ -53,7 +55,7 @@ public class Pivot {
   public static class ColumnReducer extends Reducer<IntWritable,Text,IntWritable,Text> {
     private Text textOut = new Text();
 	private String[] splitValues;
-	
+
 	/**
 	 * Reduces the values to a single line with "," separators.
 	 * Uses a TreeMap to get the values ordered according to the column number previously stored.
